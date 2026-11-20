@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>我的二次元手帐</title>
-<style>
+<link rel="manifest" href="./manifest.webmanifest">
+  <style>
 :root{--sidebar:rgba(20,20,25,0.9);--sidebar-text:#b4b4bb;--sidebar-active:rgba(255,255,255,0.15);--card:rgba(255,255,255,0.7);--text:#111;--text2:#555;--primary:#ff86b3;--primary-light:rgba(255,134,179,0.2);--danger:#ff5c5c;--radius:20px;--border:rgba(255,255,255,0.6);--bg-color:#f7f8fc}
 [data-theme="dark"]{--sidebar:rgba(15,15,20,0.95);--card:rgba(30,30,36,0.75);--text:#f0f0f5;--text2:#aaa;--border:rgba(255,255,255,0.15);--primary-light:rgba(255,134,179,0.15)}
 body.bg-sakura{background-color:#fdf5f7;background-image:radial-gradient(#ffd1dc 1.5px,transparent 1.5px);background-size:24px 24px}
@@ -702,6 +703,13 @@ const render=async()=>{
 window.onhashchange=render;
 applySet();
 render();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
 </script>
 </body>
 </html>
