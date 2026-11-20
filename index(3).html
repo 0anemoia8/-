@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>我的二次元手帐</title>
+<style>
+:root{--sidebar:rgba(20,20,25,0.9);--sidebar-text:#b4b4bb;--sidebar-active:rgba(255,255,255,0.15);--card:rgba(255,255,255,0.7);--text:#111;--text2:#555;--primary:#ff86b3;--primary-light:rgba(255,134,179,0.2);--danger:#ff5c5c;--radius:20px;--border:rgba(255,255,255,0.6);--bg-color:#f7f8fc}
+[data-theme="dark"]{--sidebar:rgba(15,15,20,0.95);--card:rgba(30,30,36,0.75);--text:#f0f0f5;--text2:#aaa;--border:rgba(255,255,255,0.15);--primary-light:rgba(255,134,179,0.15)}
+body.bg-sakura{background-color:#fdf5f7;background-image:radial-gradient(#ffd1dc 1.5px,transparent 1.5px);background-size:24px 24px}
+body.bg-space{background-color:#0f0f1a;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:36px 36px}
+body.bg-forest{background-color:#f0f7f4;background-image:linear-gradient(120deg,#e0f2f1 0%,#b2dfdb 100%)}
+body.bg-dark{background-color:#121212}body.bg-white{background-color:#fff}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+body{color:var(--text);display:flex;height:100vh;height:100dvh;overflow:hidden;font-size:14px;transition:background .3s;background-size:cover;background-position:center;background-attachment:fixed}
+.sidebar{width:260px;background:var(--sidebar);backdrop-filter:blur(20px);color:var(--sidebar-text);display:flex;flex-direction:column;transition:transform .3s;z-index:100;flex-shrink:0;box-shadow:2px 0 20px rgba(0,0,0,.1);border-right:1px solid rgba(255,255,255,.05)}
+.sidebar .logo{font-size:20px;font-weight:800;color:#fff;padding:24px 16px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.nav-scroll{flex:1;overflow-y:auto;padding:0 16px 20px;scrollbar-width:none}
+.nav-scroll::-webkit-scrollbar{display:none}
+.sidebar .group{margin-bottom:24px}
+.sidebar .group-title{font-size:12px;padding:0 12px 8px;opacity:.5;font-weight:600}
+.sidebar .nav-item{display:flex;align-items:center;padding:10px 12px;border-radius:14px;cursor:pointer;margin-bottom:4px;transition:all .2s;color:#fff}
+.sidebar .nav-item:hover,.sidebar .nav-item.active{background:var(--sidebar-active)}
+.sidebar .nav-item.active{font-weight:700;color:var(--primary)}
+.icon{width:32px;height:32px;margin-right:12px;display:flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.1);flex-shrink:0}
+.icon svg,.icon img{width:100%;height:100%;object-fit:cover}
+.sidebar .footer{font-size:12px;padding:16px;opacity:.6;display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--sidebar);border-top:1px solid rgba(255,255,255,.05)}
+.sidebar .footer .dot{width:8px;height:8px;border-radius:50%;background:#34c759;box-shadow:0 0 8px #34c759}
+.main{flex:1;overflow-y:auto;padding:32px 40px;position:relative}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.top-bar .menu-btn{display:none;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text)}
+.top-bar .date{color:var(--text2);font-size:14px;font-weight:800}
+.top-bar .search{background:var(--card);backdrop-filter:blur(10px);border:1px solid var(--border);padding:10px 20px;border-radius:24px;width:260px;font-size:14px;color:var(--text);outline:none}
+.top-bar .search:focus{border-color:var(--primary)}
+.card{background:var(--card);backdrop-filter:blur(24px) saturate(180%);border-radius:var(--radius);padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.08);margin-bottom:24px;border:1px solid var(--border);cursor:pointer;transition:transform .2s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-2px)}.card.no-hover{cursor:default}.card.no-hover:hover{transform:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.hero-title{font-size:32px;font-weight:900;margin-bottom:8px;color:var(--text)}
+.hero-sub{color:var(--text2);font-size:15px;margin-bottom:32px;display:flex;justify-content:space-between;align-items:flex-end}
+.btn-primary{background:var(--primary);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(255,134,179,.3)}
+.btn-outline{background:rgba(255,255,255,.3);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.progress-box{background:var(--card);backdrop-filter:blur(24px);border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:24px;margin-bottom:32px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.progress-track{flex:1;height:10px;background:rgba(0,0,0,.1);border-radius:5px;overflow:hidden}
+.progress-fill{height:100%;background:var(--primary);width:0%;transition:width .5s}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.page-title-wrap{display:flex;align-items:center;gap:12px}
+.page-title{font-size:26px;font-weight:900}
+.help-btn{background:var(--primary-light);color:var(--primary);border:none;width:28px;height:28px;border-radius:50%;font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(255,134,179,.2)}
+.list-item{background:var(--card);backdrop-filter:blur(24px);border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative}
+.list-item .info h4{font-size:16px;margin-bottom:6px;font-weight:800}.list-item .info p{color:var(--text2);font-size:13px}
+.badge{background:var(--primary);color:#fff;font-size:12px;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;white-space:nowrap}
+.tab-bar{display:flex;gap:10px;margin-bottom:24px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-bar button{background:rgba(255,255,255,.4);border:1px solid var(--border);color:var(--text);padding:8px 20px;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.tab-bar button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;justify-content:center;align-items:center;z-index:1000;padding:20px;backdrop-filter:blur(6px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);backdrop-filter:blur(30px);width:100%;max-width:500px;border-radius:24px;padding:28px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--border)}
+.modal h2{font-size:22px;margin-bottom:24px;font-weight:900}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:700}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.3);color:var(--text);font-size:15px;outline:none}
+.form-group textarea{height:120px;resize:vertical}
+.modal-actions{display:flex;gap:12px;margin-top:28px}
+.modal-actions button{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;border:none;cursor:pointer}
+.btn-save{background:var(--primary);color:#fff}.btn-cancel{background:rgba(0,0,0,.1);color:var(--text)}.btn-del{background:var(--danger);color:#fff}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:12px}
+.photo-item{aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);position:relative}
+.photo-item img{width:100%;height:100%;object-fit:cover}
+.check-circle{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.3);border:2px solid #fff;z-index:10;display:flex;align-items:center;justify-content:center}
+.check-circle.checked{background:var(--primary);border-color:var(--primary)}
+.check-circle.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:bold}
+/* 画师画廊特有样式 */
+.art-gallery{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.art-gallery-item{aspect-ratio:1;border-radius:12px;overflow:hidden;position:relative;background:#e0e0e0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.art-gallery-item img{width:100%;height:100%;object-fit:cover}
+.art-gallery-title{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));color:#fff;padding:20px 8px 8px;font-size:14px;font-weight:bold;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-gallery-noimg{font-size:24px;font-weight:900;color:#555;text-align:center;padding:10px;word-break:break-all}
+/* 抽屉模式特有样式 */
+.art-drawer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.art-drawer-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08);border:1px solid var(--border)}
+.art-drawer-item img{width:100%;height:100%;object-fit:cover}
+.art-drawer-title{font-size:11px;font-weight:700;color:var(--text);padding:4px;text-align:center;word-break:break-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+/* 多平台编辑行 */
+.plat-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap; background:rgba(255,255,255,0.2); padding:10px; border-radius:12px; border:1px solid var(--border); }
+.plat-row select, .plat-row input { flex:1; min-width:100px; padding:8px; font-size:14px; border-radius:8px; border:1px solid var(--border); background:#fff; color:#333; }
+.plat-row .btn-wrap { display:flex; gap:4px; }
+.plat-row button { padding:6px 10px; font-size:12px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; }
+#toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:12px 28px;border-radius:30px;font-size:15px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:2000}
+#toast.show{opacity:1}
+@media(max-width:768px){
+  .modal{padding:20px;max-height:92vh;max-height:92dvh}.modal-actions{flex-wrap:wrap}.plat-row{align-items:stretch}.plat-row select,.plat-row input{min-width:0;width:100%}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{padding:20px 16px}.top-bar .menu-btn{display:block}.top-bar .search{width:160px}.hero-title{font-size:26px}
+  .grid{grid-template-columns:1fr}.progress-box{flex-direction:column;align-items:flex-start;gap:12px}.card{padding:20px}
+}
+</style>
+</head>
+<body class="bg-sakura">
+<aside class="sidebar" id="sidebar">
+  <div class="logo">🌸 异世界手帐 <span style="cursor:pointer;font-size:16px;color:var(--text2)" onclick="$('#sidebar').classList.remove('open')">✖</span></div>
+  <div class="nav-scroll">
+    <div class="group">
+      <div class="group-title">日常</div>
+      <div class="nav-item active" onclick="go('home')"><div class="icon" id="ico-home"></div>首页总览</div>
+      <div class="nav-item" onclick="go('logs')"><div class="icon" id="ico-logs"></div>历史记录</div>
+    </div>
+    <div class="group">
+      <div class="group-title">工作</div>
+      <div class="nav-item" onclick="go('dev')"><div class="icon" id="ico-dev"></div>开发工作</div>
+      <div class="nav-item" onclick="go('artists')"><div class="icon" id="ico-artists"></div>画师查询</div>
+    </div>
+    <div class="group">
+      <div class="group-title">生活</div>
+      <div class="nav-item" onclick="go('games')"><div class="icon" id="ico-games"></div>游戏娱乐</div>
+      <div class="nav-item" onclick="go('photos')"><div class="icon" id="ico-photos"></div>相片管理</div>
+      <div class="nav-item" onclick="go('search')"><div class="icon" id="ico-search"></div>网络/全局搜索</div>
+    </div>
+    <div class="group">
+      <div class="group-title">系统</div>
+      <div class="nav-item" onclick="go('settings')"><div class="icon" id="ico-settings"></div>数据与设置</div>
+    </div>
+  </div>
+  <div class="footer"><span class="dot"></span> 结界已开启</div>
+</aside>
+<main class="main" id="app"></main>
+<div class="modal-overlay" id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="modal" id="modal-c"></div></div>
+<div id="toast"></div><script>
+const $=s=>document.querySelector(s),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)};
+const closeM=()=>$('#modal').classList.remove('show'),openM=h=>{$('#modal-c').innerHTML=h;$('#modal').classList.add('show')};
+const go=r=>{location.hash=r;if(window.innerWidth<=768)$('#sidebar').classList.remove('open')};
+
+const HELPS={home:{t:"首页总览说明",c:"1. 顶部的搜索框可以跨模块进行全局搜索（按回车触发）。<br>2. 进度条根据你的待办任务完成度自动计算。<br>3. 这里的卡片是可以定制的！去【数据与设置】->【首页模板自定义】可以调整显示内容及顺序。"},dev:{t:"开发工作说明",c:"1. 分为【项目】、【任务】和【片段资料】三个标签。<br>2. 点击【+ 新增】可以新建内容。<br>3. 任务可以关联到项目，在首页会显示待办。"},artists:{t:"画师查询说明",c:"1. 点击右上角【+ 新增】录入画师。<br>2. 点击右上角图标可以切换“画廊视图”和“抽屉视图”。<br>3. 编辑画师时可添加多个平台、自定义封面图。<br>4. 点击卡片即可修改内容或管理专属图集。"},games:{t:"游戏娱乐说明",c:"1. 记录游戏名、平台、游玩状态和评分。<br>2. 状态分为：想玩、在玩、通关、搁置。"},photos:{t:"相片管理说明",c:"1. 点击【+ 上传】支持多选图片和选择分类。<br>2. 支持建立分类、删除分类（删除分类不删图）。<br>3. 点击【管理】可多选批量删除APP内图片。"},search:{t:"全局/网络搜索说明",c:"1. 页面顶部输入框为全局搜索，可搜所有模块的数据。<br>2. 如果不输入内容，页面下方会显示传统网页搜索。"},logs:{t:"历史记录说明",c:"1. 系统会自动记录你近期的保存、快捷更新、上传等操作。"},settings:{t:"数据与设置说明",c:"1. 可以换主题、传背景图。<br>2. 首页模板自定义、自定义图标。<br>3. 【数据管理】非常重要！定期导出备份。"}};
+const showHelp=(key)=>{let h=HELPS[key];if(!h)return;openM(`<h2>📖 ${h.t}</h2><div style="font-size:15px;line-height:1.8;color:var(--text2);margin-bottom:24px">${h.c}</div><div class="modal-actions"><button class="btn-save" onclick="closeM()" style="width:100%">我知道了</button></div>`)};
+
+const AVATARS={
+  home:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="30" fill="#ffe0e9"/><path d="M20 40 Q50 0 80 40 Q60 20 50 40 Q40 20 20 40" fill="#ffb6c1"/><path d="M20 40 L5 15 L35 30 Z M80 40 L95 15 L65 30 Z" fill="#ffb6c1"/><circle cx="40" cy="55" r="5" fill="#333"/><circle cx="60" cy="55" r="5" fill="#333"/><path d="M45 65 Q50 70 55 65" stroke="#333" fill="none" stroke-width="3" stroke-linecap="round"/></svg>`,
+  dev:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="30" fill="#fce4d6"/><path d="M20 50 Q25 15 50 15 Q75 15 80 50 Q65 40 50 40 Q35 40 20 50" fill="#6b8e23"/><rect x="25" y="45" width="20" height="15" rx="3" fill="none" stroke="#333" stroke-width="3"/><rect x="55" y="45" width="20" height="15" rx="3" fill="none" stroke="#333" stroke-width="3"/><line x1="45" y1="52" x2="55" y2="52" stroke="#333" stroke-width="3"/><circle cx="35" cy="52" r="3" fill="#333"/><circle cx="65" cy="52" r="3" fill="#333"/></svg>`,
+  artists:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#fce4d6"/><path d="M15 40 Q50 10 85 40 Q70 25 50 30 Q30 25 15 40" fill="#ffcc00"/><path d="M15 40 Q10 60 25 60 Q30 50 20 45" fill="#ffcc00"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><path d="M45 65 Q50 68 55 65" stroke="#ff5c5c" fill="none" stroke-width="3"/><path d="M80 60 L95 45" stroke="#8b4513" stroke-width="4"/><circle cx="80" cy="60" r="4" fill="#ff5c5c"/></svg>`,
+  games:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#fce4d6"/><path d="M20 45 Q50 10 80 45 Q65 30 50 35 Q35 30 20 45" fill="#00ced1"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><rect x="30" y="70" width="40" height="15" rx="5" fill="#333"/><circle cx="40" cy="77" r="3" fill="#ff5c5c"/><circle cx="50" cy="77" r="3" fill="#fce4d6"/><circle cx="60" cy="77" r="3" fill="#ff5c5c"/></svg>`,
+  photos:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#fce4d6"/><path d="M20 45 Q50 10 80 45 Q60 30 50 35 Q40 30 20 45" fill="#ff69b4"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><rect x="25" y="70" width="50" height="20" rx="3" fill="#555"/><circle cx="50" cy="80" r="6" fill="#111"/><circle cx="50" cy="80" r="3" fill="#fff"/></svg>`,
+  search:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#fce4d6"/><path d="M20 45 Q50 10 80 45 Q60 30 50 35 Q40 30 20 45" fill="#ffd700"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><circle cx="75" cy="75" r="15" fill="none" stroke="#8b4513" stroke-width="4"/><line x1="85" y1="85" x2="95" y2="95" stroke="#8b4513" stroke-width="6" stroke-linecap="round"/></svg>`,
+  settings:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#fce4d6"/><path d="M20 45 Q50 5 80 45 Q60 25 50 30 Q40 25 20 45" fill="#c0c0c0"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><path d="M80 40 L90 20 L85 15" stroke="#ff69b4" stroke-width="4" fill="none"/><circle cx="90" cy="20" r="4" fill="#ffd700"/></svg>`,
+  logs:`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="28" fill="#e6e6fa"/><path d="M25 40 Q50 20 75 40 Q60 30 50 35 Q40 30 25 40" fill="#9370db"/><circle cx="40" cy="55" r="4" fill="#333"/><circle cx="60" cy="55" r="4" fill="#333"/><rect x="35" y="70" width="30" height="20" rx="2" fill="#fff" stroke="#333" stroke-width="2"/><line x1="40" y1="75" x2="60" y2="75" stroke="#333" stroke-width="2"/><line x1="40" y1="82" x2="55" y2="82" stroke="#333" stroke-width="2"/></svg>`
+};
+
+const DB={
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem('app_'+k))||d}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem('app_'+k,JSON.stringify(v));return true}catch(e){console.error('保存失败',e);toast(e&&e.name==='QuotaExceededError'?'存储空间不足，请先导出备份或清理数据':'保存失败，请检查浏览器存储权限');return false}},
+  size:()=>{let s=0;for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k.startsWith('app_'))s+=(localStorage.getItem(k)||'').length*2}return(s/1024).toFixed(1)},
+  addLog:(a,d)=>{let l=DB.get('logs',[]);l.unshift({id:uid(),t:new Date().toLocaleString(),a:a,d:d});if(l.length>100)l.pop();DB.set('logs',l)}
+};
+
+let idb;
+const initIdb=()=>new Promise((res,rej)=>{if(idb)return res();let r=indexedDB.open('photoDB',1);r.onupgradeneeded=e=>e.target.result.createObjectStore('photos',{keyPath:'id'});r.onsuccess=e=>{idb=e.target.result;res()};r.onerror=e=>rej(e)});
+const PhotoDB={
+  async put(p){await initIdb();return new Promise((resolve,reject)=>{let tx=idb.transaction('photos','readwrite');tx.objectStore('photos').put(p);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error||new Error('图片保存失败'));tx.onabort=()=>reject(tx.error||new Error('图片保存已取消'))})},
+  async get(id){await initIdb();return new Promise((resolve,reject)=>{let req=idb.transaction('photos').objectStore('photos').get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})},
+  async all(){await initIdb();return new Promise((resolve,reject)=>{let req=idb.transaction('photos').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)})},
+  async del(id){await initIdb();return new Promise((resolve,reject)=>{let tx=idb.transaction('photos','readwrite');tx.objectStore('photos').delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})},
+  async clear(){await initIdb();return new Promise((resolve,reject)=>{let tx=idb.transaction('photos','readwrite');tx.objectStore('photos').clear();tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})},
+  async replaceAll(items){await initIdb();return new Promise((resolve,reject)=>{let tx=idb.transaction('photos','readwrite'),store=tx.objectStore('photos');store.clear();items.forEach(item=>store.put(item));tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error||new Error('照片数据写入失败'));tx.onabort=()=>reject(tx.error||new Error('照片数据写入已取消'))})}
+};
+
+const getSet=()=>Object.assign({theme:'auto',bg:'sakura',customBg:'',customIcons:{},homeWidgets:['tasks','artists','games','dev','photos','search']},DB.get('set',{}));
+const applySet=()=>{let s=getSet(),t=s.theme;if(t==='auto')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;if(s.customBg){document.body.className='';document.body.style.backgroundImage=`url('${s.customBg}')`}else{document.body.style.backgroundImage='';document.body.className='bg-'+s.bg}};
+const renderIcons=()=>{let s=getSet(),i=s.customIcons||{};for(let k in AVATARS){let el=$('#ico-'+k);if(el){if(i[k])el.innerHTML=`<img src="${i[k]}">`;else el.innerHTML=AVATARS[k]}}};
+const doGlobalSearch=()=>{let kw=$('#global-search').value.trim();if(kw){window._searchKw=kw;go('search')}};
+</script><script>
+const M={
+  games:{n:'游戏娱乐',fields:[{k:'title',l:'游戏名',t:'text',req:1},{k:'platform',l:'平台',t:'text'},{k:'status',l:'状态',t:'select',opt:['想玩','在玩','通关','搁置']},{k:'rating',l:'评分(0-10)',t:'number'},{k:'progress',l:'进度',t:'text'},{k:'link',l:'链接',t:'url'},{k:'note',l:'备注',t:'textarea'}]},
+  artists:{n:'画师查询',fields:[{k:'title',l:'画师名',t:'text',req:1},{k:'tags',l:'标签(逗号分隔)',t:'text'},{k:'followed',l:'关注状态',t:'select',opt:['关注','未关注']},{k:'works',l:'喜欢作品(每行一条)',t:'textarea'},{k:'note',l:'备注',t:'textarea'},{k:'acat',l:'画师分类',t:'select',dynamic:'acat'}]}
+};
+
+let artistManageMode=false,selectedArtists=[],artistViewMode='gallery',curAcat='';
+const toggleArtistManage=()=>{artistManageMode=!artistManageMode;selectedArtists=[];render()};
+const toggleArtistSelect=(id)=>{if(selectedArtists.includes(id))selectedArtists=selectedArtists.filter(x=>x!==id);else selectedArtists.push(id);render()};
+const batchDeleteArtists=async()=>{if(!selectedArtists.length)return toast('请先选择画师');if(!confirm(`确定删除选中的 ${selectedArtists.length} 位画师吗？\n(注意：他们专属图集里的画作也会被清理)`))return;let l=DB.get('artists',[]);DB.set('artists',l.filter(x=>!selectedArtists.includes(x.id)));let p=await PhotoDB.all();for(let x of p){if(selectedArtists.includes(x.artistId))await PhotoDB.del(x.id)}DB.addLog('批量删除画师',`删除了 ${selectedArtists.length} 位画师`);artistManageMode=false;selectedArtists=[];render();toast('已批量删除')};
+
+const manageAcat=()=>{let c=DB.get('acat',[]);openM(`<h2>管理画师分类</h2><div>${c.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding:10px 0"><span>${esc(x.name)}</span><button class="btn-del" style="padding:4px 8px" onclick="delAcat('${x.id}')">删除</button></div>`).join('')}</div><div style="margin-top:12px"><button class="btn-outline" style="width:100%" onclick="addAcat()">+ 新增分类</button></div><div class="modal-actions"><button class="btn-save" onclick="closeM()" style="width:100%">完成</button></div>`)};
+const addAcat=()=>{let n=prompt('输入分类名');if(n){let c=DB.get('acat',[]);c.push({id:uid(),name:n});DB.set('acat',c);closeM();manageAcat();render()}};
+const delAcat=async id=>{if(!confirm('删除分类后，该分类下的画师将变为未分类。确认？'))return;let c=DB.get('acat',[]);DB.set('acat',c.filter(x=>x.id!==id));let l=DB.get('artists',[]);let changed=false;for(let x of l){if(x.acat===id){x.acat='';changed=true}}if(changed)DB.set('artists',l);closeM();manageAcat();render()};
+
+const getArtistCover=async (artist, photos) => {
+  if (artist.coverImg) return artist.coverImg;
+  if (artist.coverRefId) {
+    let p = photos.find(x => x.id === artist.coverRefId);
+    if (p) return p.dataUrl;
+  }
+  let first = photos.find(x => x.artistId === artist.id);
+  return first ? first.dataUrl : null;
+};
+
+const W_Tasks=()=>{let t=DB.get('task',[]),p=t.filter(x=>x.status!=='已完成');return `<div class="card" onclick="go('dev')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><h4 style="font-size:18px;font-weight:900">今日待办</h4><span class="badge" style="background:var(--text2)">${p.length} 项</span></div>${p.length?p.slice(0,3).map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;background:rgba(0,0,0,.03);padding:8px;border-radius:8px"><div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:120px">${esc(x.title)}</div><button class="btn-outline" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();markDone('${x.id}')">完成</button></div>`).join(''):'<p style="color:var(--text2);font-size:13px">暂无待办，休息一下~</p>'}</div>`};
+const W_Games=()=>{let g=DB.get('games',[]),p=g.filter(x=>x.status==='在玩');return `<div class="card" onclick="go('games')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><h4 style="font-size:18px;font-weight:900">游戏娱乐</h4><span class="badge">${p.length} 款在玩</span></div>${p.length?p.slice(0,2).map(x=>`<p style="color:var(--text2);font-size:13px">${esc(x.title)} - ${esc(x.platform||'')}</p>`).join(''):'<p style="color:var(--text2);font-size:13px">最近没有在玩的游戏</p>'}</div>`};
+const W_Artists=()=>{let a=DB.get('artists',[]),s=getSet(),i=s.customIcons||{};let ic=i.artists?`<img src="${i.artists}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-bottom:12px">`:`<div style="width:40px;height:40px;margin-bottom:12px">${AVATARS.artists}</div>`;return `<div class="card" onclick="go('artists')"><div style="display:flex;justify-content:space-between;align-items:flex-start">${ic}<span class="badge">${a.length} 位</span></div><h4 style="font-size:18px;margin-bottom:12px;font-weight:900">画师查询</h4><p style="color:var(--text2);font-size:13px">管理你喜欢的画师和图集。</p></div>`};
+const W_Dev=()=>{let p=DB.get('proj',[]),t=DB.get('task',[]);return `<div class="card" onclick="go('dev')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><h4 style="font-size:18px;font-weight:900">开发工作</h4><span class="badge">${p.length} 个项目</span></div><p style="color:var(--text2);font-size:13px">共 ${t.length} 个任务，${t.filter(x=>x.status!=='已完成').length} 个待办。</p></div>`};
+const W_Photos=()=>{return `<div class="card" onclick="go('photos')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><h4 style="font-size:18px;font-weight:900">相片管理</h4></div><p style="color:var(--text2);font-size:13px">管理你的本地图片与分类。</p></div>`};
+const W_Search=()=>{return `<div class="card" onclick="go('search')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px"><h4 style="font-size:18px;font-weight:900">网络搜索</h4></div><p style="color:var(--text2);font-size:13px">快捷搜索与历史记录。</p></div>`};
+
+const RHome=()=>{
+  let d=new Date(),ds=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`,dy=['日','一','二','三','四','五','六'];
+  let s=getSet(),wIds=s.homeWidgets||['tasks','artists','games','dev','photos','search'],wh='';
+  wIds.forEach(id=>{if(id==='tasks')wh+=W_Tasks();else if(id==='artists')wh+=W_Artists();else if(id==='games')wh+=W_Games();else if(id==='dev')wh+=W_Dev();else if(id==='photos')wh+=W_Photos();else if(id==='search')wh+=W_Search()});
+  let t=DB.get('task',[]),done=t.filter(x=>x.status==='已完成').length,pct=t.length===0?0:Math.round((done/t.length)*100);
+  return `<div class="top-bar"><div style="display:flex;align-items:center;gap:16px"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button><span class="date">星期${dy[d.getDay()]} ${ds}</span></div><input id="global-search" class="search" placeholder="全局搜索... (按回车)" onkeydown="if(event.key==='Enter')doGlobalSearch()" value="${esc(window._searchKw||'')}"></div><div class="hero-sub"><div><div class="page-title-wrap"><div class="hero-title">${d.getMonth()+1}月${d.getDate()}日，从重点开始</div><button class="help-btn" onclick="event.stopPropagation();showHelp('home')">?</button></div><p>今天的行动、提醒和工作生活状态都在这里。</p></div></div><div class="progress-box no-hover"><div style="font-weight:800;font-size:16px;white-space:nowrap">今日进度</div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><div style="font-weight:800;color:var(--primary);font-size:18px">${pct}%</div></div><div class="grid">${wh}</div>`;
+};
+
+const markDone=id=>{let l=DB.get('task',[]),i=l.findIndex(x=>x.id===id);if(i>-1){l[i].status='已完成';DB.set('task',l);DB.addLog('任务完成',l[i].title);render()}};
+
+let searchQ={};
+const RList=async k=>{
+  let m=M[k],l=DB.get(k,[]),q=(searchQ[k]||'').toLowerCase();
+  let show=l.filter(it=>{
+    if(q&&!Object.values(it).join(' ').toLowerCase().includes(q))return false;
+    if(k==='artists'&&curAcat&&it.acat!==curAcat)return false;
+    return true;
+  });
+  let isM=k==='artists'&&artistManageMode;
+  
+  let html=`<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div>
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">${m.n}</div><button class="help-btn" onclick="showHelp('${k}')">?</button></div>
+    <div style="display:flex;gap:8px">
+      ${k==='artists'?`<button class="btn-outline" onclick="artistViewMode=artistViewMode==='gallery'?'drawer':'gallery';render()">${artistViewMode==='gallery'?'🔲 抽屉':'🖼️ 画廊'}</button>`:''}
+      ${k==='artists'?`<button class="btn-outline" onclick="toggleArtistManage()">${isM?'取消':'管理'}</button>`:''}
+      <button class="btn-primary" onclick="editItem('${k}')">+ 新增</button>
+    </div>
+  </div>`;
+
+  if(k==='artists'){
+    let ac=DB.get('acat',[]);
+    html+=`<div class="tab-bar"><button class="${!curAcat?'active':''}" onclick="curAcat='';render()">全部</button>${ac.map(x=>`<button class="${curAcat===x.id?'active':''}" onclick="curAcat='${x.id}';render()">${esc(x.name)}</button>`).join('')}<button onclick="manageAcat()" style="background:var(--text2);color:#fff">⚙️分类</button></div>`;
+  }
+
+  html+=`${isM?`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;background:var(--danger);padding:12px;border-radius:12px;color:#fff"><span>已选 ${selectedArtists.length} 项</span><button class="btn-outline" style="border-color:#fff;color:#fff" onclick="batchDeleteArtists()">删除选中</button></div>`:''}
+  <input class="search" style="width:100%;margin-bottom:24px;background:var(--card);border:1px solid var(--border);padding:14px;border-radius:16px;font-size:15px;outline:none" placeholder="搜索..." oninput="searchQ['${k}']=this.value;render()" value="${esc(searchQ[k]||'')}"><div>`;
+
+  if(!show.length) html+='<div style="text-align:center;padding:60px 0;color:var(--text2);font-weight:600">暂无数据哦~</div>';
+  else {
+    if(k==='artists'&&!isM){
+      let photos = await PhotoDB.all();
+      if(artistViewMode==='gallery'){
+        html+='<div class="art-gallery">';
+        for(let it of show){
+          let cover = await getArtistCover(it, photos);
+          html+=`<div class="art-gallery-item" onclick="editItem('${k}','${it.id}')">`;
+          if(cover) html+=`<img src="${cover}"><div class="art-gallery-title">${esc(it.title)}</div>`;
+          else html+=`<div class="art-gallery-noimg" style="background:${getSet().bg==='dark'?'#333':'#f0f0f0'}">${esc(it.title)}</div>`;
+          html+='</div>';
+        }
+        html+='</div>';
+      } else {
+        html+='<div class="art-drawer">';
+        for(let it of show){
+          let cover = await getArtistCover(it, photos);
+          html+=`<div class="art-drawer-item" onclick="editItem('${k}','${it.id}')">`;
+          if(cover) html+=`<img src="${cover}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:10px;text-align:center;padding:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.title)}</div>`;
+          else html+=`<div class="art-drawer-title">${esc(it.title)}</div>`;
+          html+='</div>';
+        }
+        html+='</div>';
+      }
+    } else {
+      show.forEach(it=>{
+        let btns='';if(k==='artists'&&!isM)btns=`<button class="btn-outline" onclick="event.stopPropagation();toggleFollow('${it.id}','${it.followed}')">${it.followed==='关注'?'取关':'关注'}</button>`;
+        let onClick=isM?`toggleArtistSelect('${it.id}')`:`editItem('${k}','${it.id}')`;
+        let checkHtml=isM?`<div class="check-circle ${selectedArtists.includes(it.id)?'checked':''}"></div>`:'';
+        html+=`<div class="list-item" onclick="${onClick}">${checkHtml}<div class="info"><h4>${esc(it.title)}</h4><p>${it.platforms?it.platforms.map(p=>p.name).join(', '):(it.platform||'')}</p></div>${btns}<div style="color:var(--text2);font-size:20px;margin-left:12px">›</div></div>`;
+      });
+    }
+  }
+  return html+'</div>';
+};
+
+const toggleFollow=(id,st)=>{let l=DB.get('artists',[]),i=l.findIndex(x=>x.id===id);if(i>-1){l[i].followed=st==='关注'?'未关注':'关注';DB.set('artists',l);DB.addLog('画师状态',`${l[i].title} -> ${l[i].followed}`);render()}};
+
+// 多平台相关逻辑
+let tempPlatforms = [];
+const renderPlatRows = () => {
+  let box = $('#plat-box');
+  if(!box) return;
+  if(!tempPlatforms.length){
+    box.innerHTML = '<div style="color:var(--text2);font-size:12px;text-align:center">暂未添加平台</div>';
+    return;
+  }
+  let html = '';
+  let presets = ['Pixiv', 'Twitter/X', 'Bilibili', '微博', 'Lofter', 'ArtStation', 'Instagram'];
+  tempPlatforms.forEach((p, idx) => {
+    let isCustom = !!p.custom || (!presets.includes(p.name) && p.name !== '');
+    let opts = presets.map(x => `<option value="${x}" ${p.name===x?'selected':''}>${x}</option>`).join('');
+    opts += `<option value="custom" ${isCustom?'selected':''}>自定义...</option>`;
+    
+    html += `<div class="plat-row">
+      <select onchange="updatePlatName(${idx}, this.value)">
+        <option value="">选择平台</option>
+        ${opts}
+      </select>
+      <input type="text" placeholder="平台名" value="${isCustom?esc(p.name):''}" style="display:${isCustom?'block':'none'}" oninput="tempPlatforms[${idx}].name=this.value;tempPlatforms[${idx}].custom=true">
+      <input type="url" placeholder="主页链接" value="${esc(p.url||'')}" oninput="tempPlatforms[${idx}].url=this.value">
+      <div class="btn-wrap">
+        <button class="btn-outline" style="padding:4px 8px" onclick="movePlat(${idx}, -1)">上移</button>
+        <button class="btn-outline" style="padding:4px 8px" onclick="movePlat(${idx}, 1)">下移</button>
+        <button class="btn-del" style="padding:4px 8px" onclick="delPlat(${idx})">删除</button>
+      </div>
+    </div>`;
+  });
+  box.innerHTML = html;
+};
+
+const updatePlatName = (idx, val) => {
+  if(val === 'custom') {
+    tempPlatforms[idx].name = '';
+    tempPlatforms[idx].custom = true;
+  } else {
+    tempPlatforms[idx].name = val;
+    tempPlatforms[idx].custom = false;
+  }
+  renderPlatRows();
+};
+
+const movePlat = (idx, dir) => {
+  if(idx + dir < 0 || idx + dir >= tempPlatforms.length) return;
+  let t = tempPlatforms[idx];
+  tempPlatforms[idx] = tempPlatforms[idx+dir];
+  tempPlatforms[idx+dir] = t;
+  renderPlatRows();
+};
+
+const delPlat = (idx) => {
+  tempPlatforms.splice(idx, 1);
+  renderPlatRows();
+};
+
+const addPlat = () => {
+  tempPlatforms.push({ name: '', url: '' });
+  renderPlatRows();
+};
+
+// 弹出图集选择器
+const selectCoverFromGallery=async (id)=>{
+  let p=await PhotoDB.all();
+  let a=p.filter(x=>x.artistId===id);
+  if(!a.length) return toast('该画师暂无图集，请先上传');
+  let html='<h2>选择展示图</h2><div class="photo-grid">';
+  a.forEach(img=>{
+    html+=`<div class="photo-item" onclick="applyCover('${id}','${img.id}')"><img src="${img.dataUrl}"></div>`;
+  });
+  html+='</div><div class="modal-actions"><button class="btn-cancel" onclick="closeM()" style="width:100%">取消</button></div>';
+  openM(html);
+};
+
+const applyCover=async (artistId, photoId)=>{
+  let l=DB.get('artists',[]);
+  let idx=l.findIndex(x=>x.id===artistId);
+  if(idx<0) return;
+  if(l[idx].coverImg){
+    if(!confirm('该画师已设置单独封面，继续操作将替换原有封面，是否确认替换？')) return;
+  }
+  l[idx].coverRefId=photoId;
+  l[idx].coverImg='';
+  DB.set('artists',l);
+  closeM();
+  render();
+  toast('封面已替换');
+};
+
+const uploadCover=async(input,id)=>{
+  const file=input.files&&input.files[0];if(!file)return;
+  try{
+    const img=await readImageFile(file),du=compressImage(img,800,.8),l=DB.get('artists',[]),idx=l.findIndex(x=>x.id===id);
+    if(idx<0)return;
+    if(l[idx].coverImg&&!confirm('该画师已设置单独封面，继续操作将替换原有封面，是否确认替换？'))return;
+    l[idx].coverImg=du;l[idx].coverRefId='';DB.set('artists',l);
+    const preview=$('#cover-preview');if(preview)preview.innerHTML=`<img src="${du}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`;
+    await render();toast('单独封面已更新');
+  }catch(err){console.error(err);toast(`封面上传失败：${err.message||'请重试'}`)}finally{input.value=''}
+};
+
+const editItem=async (k,id)=>{
+  if(id==='undefined') id=null;
+  let m=M[k],it=id?DB.get(k,[]).find(x=>x.id===id):{},html=`<h2>✨ ${id?'编辑':'新增'}${m.n}</h2>`;
+  
+  // 兼容旧数据并初始化多平台
+  if(k==='artists'){
+    if(it.platforms) tempPlatforms = JSON.parse(JSON.stringify(it.platforms));
+    else if(it.platform || it.link) tempPlatforms = [{ name: it.platform || '', url: it.link || '' }];
+    else tempPlatforms = [];
+  }
+
+  if(k==='artists'&&id){
+    let p=await PhotoDB.all();
+    let currentCover = await getArtistCover(it, p);
+    html+=`<div class="form-group" style="background:rgba(255,255,255,0.4);padding:16px;border-radius:16px;border:1px solid var(--border)">
+      <label>📸 当前展示图 (封面)</label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="cover-preview" style="width:80px;height:80px;border-radius:8px;background:#eee;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:1px solid var(--border)">
+          ${currentCover ? `<img src="${currentCover}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:12px;color:#888">无封面</span>`}
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <button class="btn-outline" style="padding:6px;font-size:13px" onclick="selectCoverFromGallery('${id}')">从图集选择</button>
+          <button class="btn-outline" style="padding:6px;font-size:13px" onclick="$('#cover-up').click()">单独上传</button>
+          <input type="file" id="cover-up" accept="image/*" style="display:none" onchange="uploadCover(this,'${id}')">
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // 渲染非平台的普通字段
+  m.fields.forEach(f=>{
+    if(k==='artists' && (f.k === 'platform' || f.k === 'link')) return; // 画师使用多平台结构
+    let v=it[f.k]||'';
+    if(f.t==='select'){
+      let opts='';
+      if(f.dynamic==='acat'){opts=DB.get('acat',[]).map(x=>`<option value="${x.id}" ${v===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}
+      else{opts=f.opt.map(o=>`<option ${v===o?'selected':''}>${o}</option>`).join('')}
+      html+=`<div class="form-group"><label>${f.l}</label><select data-k="${f.k}"><option value="">请选择</option>${opts}</select></div>`;
+    }
+    else if(f.t==='textarea') html+=`<div class="form-group"><label>${f.l}</label><textarea data-k="${f.k}">${esc(v)}</textarea></div>`;
+    else html+=`<div class="form-group"><label>${f.l}${f.req?' *':''}</label><input type="${f.t}" data-k="${f.k}" value="${esc(v)}"></div>`;
+  });
+
+  // 渲染多平台区域
+  if(k==='artists'){
+    html+=`<div class="form-group" style="border-top:1px solid var(--border);padding-top:20px;margin-top:20px">
+      <label>🌐 平台与主页</label>
+      <div id="plat-box" style="margin-bottom:10px"></div>
+      <button class="btn-outline" style="width:100%" onclick="addPlat()">+ 添加平台</button>
+    </div>`;
+  }
+
+  if(id&&k==='artists'){
+    html+=`<div class="form-group" style="border-top:1px solid var(--border);padding-top:20px;margin-top:20px"><label>🎨 专属图集 (仅保存在APP内)</label><div id="artist-gallery" class="photo-grid"></div><button class="btn-outline" style="width:100%;margin-top:10px" onclick="$('#gallery-up').click()">+ 上传画作图</button><input type="file" id="gallery-up" accept="image/*" style="display:none" onchange="uploadGallery(this,'${id}')"></div>`;
+  }
+
+  html+=`<div class="modal-actions">${id?`<button class="btn-del" onclick="delItem('${k}','${id}')">删除</button>`:''}<button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-save" onclick="saveItem('${k}','${id||''}')">保存</button></div>`;
+  
+  openM(html);
+  if(k==='artists') renderPlatRows();
+  if(id&&k==='artists'){loadArtistGallery(id)}
+};
+
+const saveItem=(k,id)=>{
+  if(id==='undefined') id=null;
+  let m=M[k],d={},ok=1;
+  m.fields.forEach(f=>{
+    if(k==='artists' && (f.k === 'platform' || f.k === 'link')) return;
+    let el=$(`[data-k="${f.k}"]`);if(!el)return;let v=el.value.trim();
+    if(f.req&&!v)ok=0;
+    d[f.k]=f.t==='number'?(v?Number(v):''):v;
+  });
+  if(!ok)return toast('请填写必填项');
+  
+  if(k==='artists'){
+    d.platforms = tempPlatforms.filter(p=>p.name.trim() || p.url.trim());
+  }
+
+  let l=DB.get(k,[]);
+  if(id){
+    let i=l.findIndex(x=>x.id===id);
+    if(i>-1) l[i]={...l[i],...d};
+  } else {
+    d.id=uid();l.unshift(d);
+  }
+  DB.set(k,l);DB.addLog('保存数据',`更新了 ${m.n}: ${d.title}`);closeM();render();toast('保存成功');
+};
+
+const delItem=(k,id)=>openM(`<h2>确认删除</h2><p style="color:var(--text2);margin-bottom:24px">删除后不可恢复哦</p><div class="modal-actions"><button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-del" onclick="delSingleItem('${k}','${id}')">确认删除</button></div>`);
+
+const delSingleItem=async(k,id)=>{
+  let l=DB.get(k,[]);DB.set(k,l.filter(x=>x.id!==id));
+  if(k==='artists'){let p=await PhotoDB.all();for(let x of p){if(x.artistId===id)await PhotoDB.del(x.id)}}
+  DB.addLog('删除数据',`删除了 ${k}`);closeM();render();toast('已删除');
+};
+</script><script>
+let devTab='proj';
+const RDev=()=>{
+  let p=DB.get('proj',[]),t=DB.get('task',[]),s=DB.get('snip',[]);
+  let html=`<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div><div class="page-header"><div class="page-title-wrap"><div class="page-title">开发工作</div><button class="help-btn" onclick="showHelp('dev')">?</button></div><button class="btn-primary" onclick="editDev('${devTab}')">+ 新增</button></div><div class="tab-bar"><button class="${devTab==='proj'?'active':''}" onclick="devTab='proj';render()">项目</button><button class="${devTab==='task'?'active':''}" onclick="devTab='task';render()">任务</button><button class="${devTab==='snip'?'active':''}" onclick="devTab='snip';render()">片段资料</button></div><div>`;
+  if(devTab==='proj'){
+    if(!p.length)html+='<div style="text-align:center;padding:60px 0;color:var(--text2)">暂无项目</div>';
+    p.forEach(x=>{let pt=t.filter(y=>y.pid===x.id),d=pt.filter(y=>y.status==='已完成').length;html+=`<div class="list-item" onclick="editDev('proj','${x.id}')"><div class="info"><h4>${esc(x.title)}</h4><p>任务进度: ${d}/${pt.length}</p></div><div style="color:var(--text2);font-size:20px">›</div></div>`})
+  }else if(devTab==='task'){
+    let pd=t.filter(x=>x.status!=='已完成');
+    if(!pd.length)html+='<div style="text-align:center;padding:60px 0;color:var(--text2)">暂无待办任务</div>';
+    pd.forEach(x=>{let pr=p.find(y=>y.id===x.pid);html+=`<div class="list-item" onclick="editDev('task','${x.id}')"><div class="info"><h4>${esc(x.title)}</h4><p>项目: ${pr?esc(pr.title):'未归属'}</p></div><div style="display:flex;gap:8px"><button class="btn-outline" style="font-size:13px;padding:8px 12px" onclick="event.stopPropagation();editDev('task','${x.id}')">编辑</button><button class="btn-outline" style="font-size:13px;padding:8px 12px" onclick="event.stopPropagation();markDone('${x.id}')">完成</button></div></div>`})
+  }else{
+    if(!s.length)html+='<div style="text-align:center;padding:60px 0;color:var(--text2)">暂无片段</div>';
+    s.forEach(x=>{html+=`<div class="list-item" onclick="editDev('snip','${x.id}')"><div class="info"><h4>${esc(x.title)}</h4><p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${esc(x.content)}</p></div><div style="color:var(--text2);font-size:20px">›</div></div>`})
+  }
+  return html+'</div>';
+};
+
+const editDev=(tab,id)=>{
+  if(id==='undefined') id=null;
+  let key=tab==='proj'?'proj':tab==='task'?'task':'snip',it=id?DB.get(key,[]).find(x=>x.id===id):{},html=`<h2>✨ ${id?'编辑':'新增'}${tab==='proj'?'项目':tab==='task'?'任务':'片段'}</h2><div class="form-group"><label>标题 *</label><input id="d-title" value="${esc(it.title||'')}"></div>`;
+  if(tab==='proj')html+=`<div class="form-group"><label>状态</label><select id="d-status"><option ${it.status==='进行中'?'selected':''}>进行中</option><option ${it.status==='已完成'?'selected':''}>已完成</option></select></div>`;
+  else if(tab==='task')html+=`<div class="form-group"><label>所属项目</label><select id="d-pid"><option value="">未归属</option>${DB.get('proj',[]).map(p=>`<option value="${p.id}" ${it.pid===p.id?'selected':''}>${esc(p.title)}</option>`).join('')}</select></div>`;
+  else html+=`<div class="form-group"><label>内容</label><textarea id="d-content">${esc(it.content||'')}</textarea></div>`;
+  html+=`<div class="modal-actions">${id?`<button class="btn-del" onclick="delDev('${key}','${id}')">删除</button>`:''}<button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-save" onclick="saveDev('${key}','${id||''}')">保存</button></div>`;
+  openM(html);
+};
+
+const saveDev=(key,id)=>{
+  if(id==='undefined') id=null;
+  let d={title:$('#d-title').value.trim()};if(!d.title)return toast('请填写标题');
+  if(key==='proj')d.status=$('#d-status').value;if(key==='task')d.pid=$('#d-pid').value;if(key==='snip')d.content=$('#d-content').value;
+  let l=DB.get(key,[]);if(id){let i=l.findIndex(x=>x.id===id);if(i>-1)l[i]={...l[i],...d}}else{d.id=uid();l.unshift(d)}
+  DB.set(key,l);DB.addLog('保存开发',`更新了 ${d.title}`);closeM();render();
+};
+
+const delDev=(k,id)=>openM(`<h2>确认删除</h2><div class="modal-actions"><button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-del" onclick="DB.set('${k}',DB.get('${k}',[]).filter(x=>x.id!=='${id}'));${k==='proj'?`DB.set('task',DB.get('task',[]).filter(x=>x.pid!=='${id}'));`:''}closeM();render()">确认</button></div>`);
+
+const loadArtistGallery=async(id)=>{
+  let p=await PhotoDB.all();let a=p.filter(x=>x.artistId===id);let box=$('#artist-gallery');if(!box)return;
+  if(!a.length){box.innerHTML='<div style="color:var(--text2);font-size:12px;width:100%;grid-column:1/-1">暂无画作图</div>';return}
+  box.innerHTML=a.map(x=>`<div class="photo-item" onclick="viewPhoto('${x.id}')"><img src="${x.dataUrl}"></div>`).join('')
+};
+
+const uploadGallery=async(input,artistId)=>{
+  const file=input.files&&input.files[0];if(!file)return;
+  try{const img=await readImageFile(file),dataUrl=compressImage(img,800,.8);await PhotoDB.put({id:uid(),title:file.name,dataUrl,cat:'',artistId});toast('已添加');await loadArtistGallery(artistId);await render()}
+  catch(err){console.error(err);toast(`上传失败：${err.message||'请重试'}`)}finally{input.value=''}
+};
+
+let photoCat='',photoManageMode=false,selectedPhotos=[],pendingCat='';
+const togglePhotoManage=()=>{photoManageMode=!photoManageMode;selectedPhotos=[];render()};
+const togglePhotoSelect=(id)=>{if(selectedPhotos.includes(id))selectedPhotos=selectedPhotos.filter(x=>x!==id);else selectedPhotos.push(id);render()};
+const batchDeletePhotos=async()=>{if(!selectedPhotos.length)return toast('请先选择照片');if(!confirm(`确定删除选中的 ${selectedPhotos.length} 张照片吗？\n(仅限APP内，不影响手机原图)`))return;for(let id of selectedPhotos)await PhotoDB.del(id);DB.addLog('批量删除相片',`删除了 ${selectedPhotos.length} 张`);photoManageMode=false;selectedPhotos=[];render();toast('已删除')};
+
+const RPhoto=async()=>{
+  let p=await PhotoDB.all(),c=DB.get('pcat',[]),s=photoCat?p.filter(x=>x.cat===photoCat):p;let isM=photoManageMode;
+  let html=`<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div><div class="page-header"><div class="page-title-wrap"><div class="page-title">相片管理 (${p.length})</div><button class="help-btn" onclick="showHelp('photos')">?</button></div><div style="display:flex;gap:8px"><button class="btn-outline" onclick="togglePhotoManage()">${isM?'取消':'管理'}</button><button class="btn-primary" onclick="preUpload()">+ 上传</button></div></div>${isM?`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;background:var(--danger);padding:12px;border-radius:12px;color:#fff"><span>已选 ${selectedPhotos.length} 项</span><button class="btn-outline" style="border-color:#fff;color:#fff" onclick="batchDeletePhotos()">删除选中</button></div>`:''}<input type="file" id="file-up" accept="image/*" multiple style="display:none" onchange="uploadMultiPhoto(this)"><div class="tab-bar"><button class="${!photoCat?'active':''}" onclick="photoCat='';render()">全部</button>${c.map(x=>`<button class="${photoCat===x.id?'active':''}" onclick="photoCat='${x.id}';render()">${esc(x.name)}</button>`).join('')}<button onclick="addCat()">+ 分类</button><button onclick="manageCat()" style="background:var(--text2);color:#fff">管理分类</button></div><div class="photo-grid">${s.map(x=>{let checkHtml=isM?`<div class="check-circle ${selectedPhotos.includes(x.id)?'checked':''}"></div>`:'';let onClick=isM?`togglePhotoSelect('${x.id}')`:`viewPhoto('${x.id}')`;return `<div class="photo-item" onclick="${onClick}">${checkHtml}<img src="${x.dataUrl}"></div>`}).join('')}</div>`;
+  return html;
+};
+
+const preUpload=()=>{let c=DB.get('pcat',[]),opts=c.map(x=>`<option value="${x.id}" ${photoCat===x.id?'selected':''}>${esc(x.name)}</option>`).join('');openM(`<h2>选择分类</h2><div class="form-group"><label>上传到哪个分类？</label><select id="upload-cat"><option value="">未分类</option>${opts}</select></div><div class="modal-actions"><button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-save" onclick="startUpload()">去相册选图</button></div>`)};
+const startUpload=()=>{pendingCat=$('#upload-cat').value;closeM();$('#file-up').click()};
+
+const readImageFile=file=>new Promise((resolve,reject)=>{
+  const reader=new FileReader();reader.onerror=()=>reject(new Error(`${file.name} 读取失败`));
+  reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error(`${file.name} 不是可识别的图片`));img.onload=()=>resolve(img);img.src=reader.result};reader.readAsDataURL(file);
+});
+const compressImage=(img,max=800,quality=.8)=>{
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');if(!ctx)throw new Error('当前浏览器不支持图片处理');
+  let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;if(!w||!h)throw new Error('图片尺寸无效');
+  if(w>max||h>max){const scale=Math.min(max/w,max/h);w=Math.round(w*scale);h=Math.round(h*scale)}
+  canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0,w,h);return canvas.toDataURL('image/jpeg',quality);
+};
+const uploadMultiPhoto=async input=>{
+  const files=Array.from(input.files||[]);if(!files.length)return;
+  const total=files.length;let current=0,failed=[];
+  openM(`<h2>正在处理...</h2><div class="progress-box no-hover" style="margin:0;border:none;box-shadow:none;background:transparent"><div style="font-weight:800;font-size:16px;white-space:nowrap" id="upload-progress-text">0/${total}</div><div class="progress-track"><div class="progress-fill" id="upload-progress-bar" style="width:0%"></div></div></div><p id="upload-progress-note" style="color:var(--text2);font-size:12px;margin-top:12px">请勿关闭页面</p>`);
+  try{
+    for(const file of files){
+      try{const img=await readImageFile(file),dataUrl=compressImage(img);await PhotoDB.put({id:uid(),title:file.name,dataUrl,cat:pendingCat,artistId:''})}
+      catch(err){console.error(err);failed.push(`${file.name}: ${err.message}`)}
+      current++;const pct=Math.round(current/total*100),txt=$('#upload-progress-text'),bar=$('#upload-progress-bar');if(txt)txt.textContent=`${current}/${total}`;if(bar)bar.style.width=`${pct}%`;
+    }
+    DB.addLog('上传相片',`成功 ${total-failed.length} 张，失败 ${failed.length} 张`);
+    closeM();await render();toast(failed.length?`上传完成，${failed.length} 张失败`:'全部上传成功');
+    if(failed.length)console.warn('以下图片上传失败：',failed);
+  }catch(err){console.error(err);closeM();toast('上传过程中发生错误，请重试')}
+  finally{input.value=''}
+};
+
+const addCat=()=>{let n=prompt('输入分类名称');if(n){let c=DB.get('pcat',[]);c.push({id:uid(),name:n});DB.set('pcat',c);render()}};
+const manageCat=()=>{let c=DB.get('pcat',[]);if(!c.length)return toast('暂无分类');openM(`<h2>管理分类</h2><div>${c.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding:10px 0"><span>${esc(x.name)}</span><button class="btn-del" style="padding:4px 8px" onclick="delCat('${x.id}')">删除</button></div>`).join('')}</div><div class="modal-actions"><button class="btn-save" onclick="closeM()" style="width:100%">完成</button></div>`)};
+const delCat=async id=>{if(!confirm('删除分类后，该分类下的照片将变为未分类。确认？'))return;let c=DB.get('pcat',[]);DB.set('pcat',c.filter(x=>x.id!==id));let p=await PhotoDB.all();for(let x of p){if(x.cat===id){x.cat='';await PhotoDB.put(x)}}DB.set('pcat',DB.get('pcat',[]).filter(x=>x.id!==id));closeM();render();toast('分类已删除')};
+
+const viewPhoto=async id=>{
+  let p=await PhotoDB.get(id);if(!p)return;let cats=DB.get('pcat',[]);let opts=cats.map(c=>`<option value="${c.id}" ${p.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  openM(`<h2>照片详情</h2><img src="${p.dataUrl}" style="width:100%;border-radius:12px;margin-bottom:16px"><div class="form-group"><label>所属分类</label><select id="move-cat"><option value="">未分类</option>${opts}</select></div><div class="modal-actions"><button class="btn-del" onclick="deletePhoto('${p.id}')">彻底删除</button><button class="btn-save" onclick="savePhotoCat('${p.id}')">保存</button></div><p style="text-align:center;font-size:12px;color:var(--text2);margin-top:10px">* 仅删除APP内记录，不影响手机相册原图</p>`)
+};
+const deletePhoto=async id=>{if(!confirm('确认彻底删除这张照片？'))return;await PhotoDB.del(id);closeM();render();toast('已删除')};
+const savePhotoCat=async id=>{let p=await PhotoDB.get(id);if(!p)return;p.cat=$('#move-cat').value;await PhotoDB.put(p);closeM();render();toast('已修改分类')};
+
+const RSearch=async()=>{
+  let kw=window._searchKw||'',res=[];
+  if(kw){
+    let kws=kw.toLowerCase();
+    const sources=[['artists','artists','画师'],['games','games','游戏'],['dev_proj','proj','项目'],['dev_task','task','任务'],['dev_snip','snip','片段'],['pcat','pcat','相片分类'],['acat','acat','画师分类'],['site','site','网络站点'],['logs','logs','历史记录'],['hist','hist','历史数据']];
+    sources.forEach(([mod,key,label])=>DB.get(key,[]).forEach(it=>{if(JSON.stringify(it).toLowerCase().includes(kws))res.push({...it,_mod:mod,_label:label})}));
+    try{(await PhotoDB.all()).forEach(it=>{let cat=DB.get('pcat',[]).find(c=>c.id===it.cat);if(JSON.stringify({title:it.title,cat:cat&&cat.name,artistId:it.artistId}).toLowerCase().includes(kws))res.push({...it,_mod:'photo',_label:'照片'})})}catch(e){console.warn('读取照片索引失败',e)}
+  }
+  let html=`<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div><div class="page-header"><div class="page-title-wrap"><div class="page-title">全局搜索</div><button class="help-btn" onclick="showHelp('search')">?</button></div><button class="btn-outline" onclick="window._searchKw='';go('home')">返回首页</button></div><input class="search" style="width:100%;margin-bottom:24px;background:var(--card);border:1px solid var(--border);padding:14px;border-radius:16px;font-size:15px;outline:none" placeholder="输入关键词查找你的本地记录..." onkeydown="if(event.key==='Enter'){window._searchKw=this.value;render()}" value="${esc(kw)}">`;
+  if(kw){
+    html+=`<p style="margin-bottom:16px;color:var(--text2)">包含 "${esc(kw)}" 的本地结果 (${res.length} 项)</p>`;
+    if(!res.length)html+='<div style="text-align:center;padding:40px;color:var(--text2)">在你的资料库里没有找到相关结果</div>';
+    else res.forEach(r=>{
+      let fn='';
+      if(r._mod==='dev_proj'||r._mod==='dev_task'||r._mod==='dev_snip')fn=`editDev('${r._mod.slice(4)}','${r.id}')`;
+      else if(r._mod==='photo')fn=`viewPhoto('${r.id}')`;
+      else if(r._mod==='pcat'||r._mod==='acat'||r._mod==='site'||r._mod==='logs'||r._mod==='hist')fn=`toast('该类记录请在对应模块查看')`;
+      else fn=`editItem('${r._mod}','${r.id}')`;
+      html+=`<div class="list-item" onclick="${fn}"><div class="info"><h4>${esc(r.title||r.name||r.a||'未命名记录')}</h4><p>来自模块: ${esc(r._label)}</p></div><div style="color:var(--text2);font-size:20px">›</div></div>`;
+    });
+    html+=`<div style="text-align:center;margin-top:30px"><button class="btn-outline" onclick="window._searchKw='';render()">清空搜索内容</button></div>`;
+  }else{
+    let st=DB.get('site',[]);
+    html+=`<div class="page-header" style="margin-bottom:16px"><div style="font-weight:800;font-size:18px">网络快捷搜索</div><button class="btn-outline" style="font-size:13px;padding:6px 12px" onclick="addSite()">+ 新增</button></div>`;
+    st.forEach(s=>{html+=`<div class="list-item" style="padding:16px 20px"><div class="info"><h4>${esc(s.name)}</h4><p>${esc(s.url)}</p></div><button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="openSite('${s.id}')">搜索</button><button class="btn-outline" style="font-size:12px;padding:6px 12px;color:var(--danger)" onclick="delSite('${s.id}')">删除</button></div>`})
+  }
+  return html;
+};
+const openSite=(id)=>{
+  let site=DB.get('site',[]).find(x=>x.id===id);if(!site)return;
+  let raw=String(site.url||'').trim();if(!raw)return toast('请先填写有效网址');
+  let url;try{url=new URL(raw.replace(/%s/g,encodeURIComponent(window._searchKw||'')));}catch(e){return toast('网址格式不正确')}
+  if(!['http:','https:'].includes(url.protocol))return toast('为安全起见，只允许打开 HTTP/HTTPS 网址');
+  window.open(url.href,'_blank','noopener,noreferrer');
+};
+const addSite=()=>openM(`<h2>✨ 新增站点</h2><div class="form-group"><label>名称</label><input id="st-n"></div><div class="form-group"><label>URL(用%s代替关键词)</label><input id="st-u" value="https://www.baidu.com/s?wd=%s"></div><div class="modal-actions"><button class="btn-cancel" onclick="closeM()">取消</button><button class="btn-save" onclick="saveSite()">保存</button></div>`);
+const saveSite=()=>{let n=$('#st-n').value.trim(),u=$('#st-u').value.trim();if(!n||!u)return toast('请填写名称和网址');let test;try{test=new URL(u.replace(/%s/g,'test'))}catch(e){return toast('网址格式不正确')};if(!['http:','https:'].includes(test.protocol))return toast('只允许 HTTP/HTTPS 网址');let l=DB.get('site',[]);l.push({id:uid(),name:n,url:u});DB.set('site',l);closeM();render()};
+const delSite=id=>{DB.set('site',DB.get('site',[]).filter(x=>x.id!==id));render()};
+
+const RLogs=()=>{let logs=DB.get('logs',[]);let html=`<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div><div class="page-header"><div class="page-title-wrap"><div class="page-title">历史记录</div><button class="help-btn" onclick="showHelp('logs')">?</button></div><button class="btn-outline" onclick="DB.set('logs',[]);render()">清空记录</button></div><div>`;if(!logs.length)html+='<div style="text-align:center;padding:60px 0;color:var(--text2);font-weight:600">暂无历史记录~</div>';else logs.forEach(l=>{html+=`<div class="list-item" style="padding:16px 20px;flex-direction:column;align-items:flex-start;gap:6px"><div style="display:flex;justify-content:space-between;width:100%"><span class="badge" style="margin-left:0;background:var(--primary-light);color:var(--primary)">${esc(l.a)}</span><span style="font-size:12px;color:var(--text2)">${l.t}</span></div><div style="font-size:14px;font-weight:600;margin-top:4px">${esc(l.d)}</div></div>`});return html+'</div>'};
+
+const AVAILABLE_WIDGETS=[{id:'tasks',name:'今日待办'},{id:'artists',name:'画师查询'},{id:'games',name:'游戏娱乐'},{id:'dev',name:'开发工作'},{id:'photos',name:'相片管理'},{id:'search',name:'网络搜索'}];
+const RSettings=()=>{
+  let s=getSet(),mods={home:'首页',logs:'记录',dev:'开发',artists:'画师',games:'游戏',photos:'相册',search:'搜索',settings:'设置'},ir='';
+  for(let k in mods){let ic=s.customIcons&&s.customIcons[k];ir+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:12px"><div class="icon" style="background:var(--bg-color)">${ic?`<img src="${s.customIcons[k]}">`:AVATARS[k]}</div><span style="font-weight:700">${mods[k]}</span></div><div style="display:flex;gap:8px"><input type="file" id="up-ico-${k}" accept="image/*" style="display:none" onchange="uploadAsset(this,'icon','${k}')"><button class="btn-outline" style="font-size:12px;padding:6px 10px" onclick="$('#up-ico-${k}').click()">更换</button>${ic?`<button class="btn-outline" style="font-size:12px;padding:6px 10px;color:var(--danger);border-color:var(--danger)" onclick="resetAsset('icon','${k}')">重置</button>`:''}</div></div>`}
+  let w=s.homeWidgets||['tasks','artists','games','dev','photos','search'],wc=w.map((id,idx)=>{let x=AVAILABLE_WIDGETS.find(y=>y.id===id);if(!x)return '';return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">${x.name}</span><div style="display:flex;gap:6px"><button class="btn-outline" style="padding:4px 8px" onclick="moveWidget(${idx},-1)">↑</button><button class="btn-outline" style="padding:4px 8px" onclick="moveWidget(${idx},1)">↓</button><button class="btn-del" style="padding:4px 8px;border:none;border-radius:6px" onclick="removeWidget(${idx})">移除</button></div></div>`}).join('');
+  let rw=AVAILABLE_WIDGETS.filter(x=>!w.includes(x.id)),aw=rw.length?`<div style="margin-top:12px"><select id="add-widget-select" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);margin-right:8px">${rw.map(x=>`<option value="${x.id}">${x.name}</option>`).join('')}</select><button class="btn-primary" style="padding:8px 16px" onclick="addWidget()">添加组件</button></div>`:'<p style="margin-top:12px;color:var(--text2);font-size:12px">所有组件已添加</p>';
+  return `<div class="top-bar"><button class="menu-btn" onclick="$('#sidebar').classList.add('open')">☰</button></div><div class="page-header"><div class="page-title-wrap"><div class="page-title">数据与设置</div><button class="help-btn" onclick="showHelp('settings')">?</button></div></div><div class="card no-hover"><h3 style="font-size:18px;margin-bottom:20px;font-weight:900">外观设置</h3><div class="form-group"><label>主题模式</label><select onchange="let st=getSet();st.theme=this.value;DB.set('set',st);applySet()"><option value="auto" ${s.theme==='auto'?'selected':''}>跟随系统</option><option value="light" ${s.theme==='light'?'selected':''}>浅色</option><option value="dark" ${s.theme==='dark'?'selected':''}>深色</option></select></div><div class="form-group"><label>自定义背景图</label><div style="display:flex;gap:12px;align-items:center"><input type="file" id="up-bg" accept="image/*" style="display:none" onchange="uploadAsset(this,'bg')"><button class="btn-outline" style="flex:1" onclick="$('#up-bg').click()">上传图片</button>${s.customBg?`<button class="btn-del" style="flex:0.5;padding:10px" onclick="resetAsset('bg')">清除</button>`:''}</div></div>${!s.customBg?`<div class="form-group"><label>内置背景风格</label><select onchange="let st=getSet();st.bg=this.value;DB.set('set',st);applySet()"><option value="sakura" ${s.bg==='sakura'?'selected':''}>🌸 樱花幻境</option><option value="space" ${s.bg==='space'?'selected':''}>🌌 浩瀚星空</option><option value="forest" ${s.bg==='forest'?'selected':''}>🌿 精灵森林</option><option value="white" ${s.bg==='white'?'selected':''}>📄 极简纯白</option><option value="dark" ${s.bg==='dark'?'selected':''}>🌑 绝对暗夜</option></select></div>`:''}</div><div class="card no-hover"><h3 style="font-size:18px;margin-bottom:16px;font-weight:900">首页模板自定义</h3>${wc}${aw}</div><div class="card no-hover"><h3 style="font-size:18px;margin-bottom:16px;font-weight:900">自定义模块头像</h3>${ir}</div><div class="card no-hover"><h3 style="font-size:18px;margin-bottom:20px;font-weight:900">数据管理 (${DB.size()} KB)</h3><button class="btn-outline" style="width:100%;margin-bottom:16px" onclick="exportData()">导出备份</button><button class="btn-outline" style="width:100%;margin-bottom:16px" onclick="$('#imp-file').click()">导入备份</button><input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(this)"><button class="btn-del" style="width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:700;cursor:pointer" onclick="clearAll()">清空全部数据</button></div>`;
+};
+const moveWidget=(i,d)=>{let s=getSet(),w=s.homeWidgets||['tasks','artists','games','dev','photos','search'];if(i+d<0||i+d>=w.length)return;let t=w[i];w[i]=w[i+d];w[i+d]=t;s.homeWidgets=w;DB.set('set',s);render()};
+const removeWidget=i=>{let s=getSet(),w=s.homeWidgets||['tasks','artists','games','dev','photos','search'];w.splice(i,1);s.homeWidgets=w;DB.set('set',s);render()};
+const addWidget=()=>{let sel=$('#add-widget-select'),v=sel.value;if(!v)return;let s=getSet(),w=s.homeWidgets||[];w.push(v);s.homeWidgets=w;DB.set('set',s);render()};
+
+const uploadAsset=async(input,type,k='')=>{
+  const file=input.files&&input.files[0];if(!file)return;
+  try{
+    const img=await readImageFile(file),du=compressImage(img,type==='bg'?1080:128,.85),st=getSet();
+    if(type==='bg')st.customBg=du;else{if(!st.customIcons)st.customIcons={};st.customIcons[k]=du}
+    if(!DB.set('set',st))throw new Error('浏览器存储空间不足');
+    DB.addLog('更换外观',type==='bg'?'更新背景':'更新图标');applySet();await render();toast('上传成功');
+  }catch(err){console.error(err);toast(`上传失败：${err.message||'请重试'}`)}finally{input.value=''}
+};
+const resetAsset=(type,k='')=>{let s=getSet();if(type==='bg')s.customBg='';else if(s.customIcons)delete s.customIcons[k];DB.set('set',s);applySet();render();toast('已恢复默认')};
+
+const BACKUP_KEYS=['games','artists','dev','proj','task','snip','site','hist','pcat','logs','acat'];
+const buildBackup=async()=>{let d={version:2,createdAt:new Date().toISOString()};BACKUP_KEYS.forEach(k=>d[k]=DB.get(k,[]));d.photos=await PhotoDB.all();d.settings=getSet();return d};
+const downloadBackup=async(filename='backup.json')=>{let d=await buildBackup(),blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+const exportData=async()=>{try{await downloadBackup(`手帐备份_${new Date().toISOString().slice(0,10)}.json`);toast('导出成功')}catch(e){console.error(e);toast('导出失败，请检查存储权限')}};
+const importData=input=>{
+  let f=input.files&&input.files[0];if(!f)return;
+  if(f.size>100*1024*1024){toast('备份文件过大（上限100MB）');input.value='';return}
+  let r=new FileReader();
+  r.onerror=()=>{toast('读取备份文件失败');input.value=''};
+  r.onload=async e=>{
+    try{
+      let d=JSON.parse(e.target.result);
+      if(!d||typeof d!=='object'||Array.isArray(d))throw new Error('备份结构无效');
+      for(let k of BACKUP_KEYS)if(d[k]!==undefined&&!Array.isArray(d[k]))throw new Error(`${k} 数据格式无效`);
+      if(d.photos!==undefined&&!Array.isArray(d.photos))throw new Error('照片数据格式无效');
+      if(d.settings!==undefined&&(!d.settings||typeof d.settings!=='object'||Array.isArray(d.settings)))throw new Error('设置数据格式无效');
+      if(!confirm('导入将覆盖当前应用数据。系统会先下载当前数据备份，再继续导入。确认继续？'))return;
+      await downloadBackup(`导入前自动备份_${new Date().toISOString().slice(0,10)}.json`);
+      // 仅写入白名单键；未包含的模块按空数据处理，避免旧数据残留。
+      for(let k of BACKUP_KEYS)if(!DB.set(k,d[k]||[]))throw new Error(`保存 ${k} 数据失败，已保留导入前备份`);
+      const importedSettings=d.settings||{theme:'auto',bg:'sakura',customBg:'',customIcons:{},homeWidgets:['tasks','artists','games','dev','photos','search']};
+      if(!DB.set('set',importedSettings))throw new Error('保存设置失败，已保留导入前备份');
+      const photos=(d.photos||[]).filter(photo=>photo&&typeof photo==='object'&&photo.id&&typeof photo.dataUrl==='string');
+      await PhotoDB.replaceAll(photos);
+      applySet();await render();toast('导入成功');
+    }catch(err){console.error('导入备份失败',err);toast(err.message&&err.message!=='Unexpected end of JSON input'?`导入失败：${err.message}`:'文件格式错误或数据损坏')}
+    finally{input.value=''}
+  };
+  r.readAsText(f);
+};
+const clearAll=async()=>{
+  if(!confirm('清空后不可恢复。为保护数据，系统会先下载一份当前备份，然后清空全部应用数据。确认继续？'))return;
+  try{
+    await downloadBackup(`清空前自动备份_${new Date().toISOString().slice(0,10)}.json`);
+    const keys=[];for(let i=0;i<localStorage.length;i++){let key=localStorage.key(i);if(key&&key.startsWith('app_'))keys.push(key)}
+    keys.forEach(key=>localStorage.removeItem(key));
+    await PhotoDB.clear();applySet();await render();toast('数据已清空；清空前备份已下载');
+  }catch(e){console.error('清空数据失败',e);toast('操作未完全完成，请检查存储权限并确认备份文件已保存')}
+};
+
+const render=async()=>{
+  let h=location.hash.slice(1)||'home';
+  document.querySelectorAll('.sidebar .nav-item').forEach(el=>{el.classList.toggle('active',el.getAttribute('onclick')&&el.getAttribute('onclick').includes(h))});
+  let html='';
+  try{
+    if(h==='home')html=RHome();
+    else if(['games','artists'].includes(h))html=await RList(h);
+    else if(h==='dev')html=RDev();
+    else if(h==='photos')html=await RPhoto();
+    else if(h==='search')html=await RSearch();
+    else if(h==='logs')html=RLogs();
+    else if(h==='settings')html=RSettings();
+    else html=RHome();
+    $('#app').innerHTML=html;
+    renderIcons();
+  }catch(e){console.error('页面渲染失败',e);$('#app').innerHTML=`<div style="color:var(--danger);padding:20px">页面加载失败：${esc(e.message||'未知错误')}<button class="btn-outline" style="display:block;margin-top:12px" onclick="render()">重新加载</button></div>`}
+};
+window.onhashchange=render;
+applySet();
+render();
+</script>
+</body>
+</html>
